@@ -1,2 +1,24 @@
+# - Clojure CLI dependency cache
 .cpcache
 .env
+.claude
+.shadow-cljs
+
+#  - compiler cache (regenerated on each build)
+.shadow-cljs/
+#  - npm dependencies (restored via npm install)
+node_modules/
+#  - build outputs
+target/
+#  - generated JavaScript from development builds
+resources/public/js/
+
+out/
+
+.nrepl-port
+
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+

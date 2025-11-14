@@ -1,0 +1,156 @@
+#+title: Project
+
+* Notes
+** Tech stack exploration/navigation
+*** discussion with claude
+**** claude suggestion
+Recommended Tech Stack for Single-File HTML Bible App
+
+1. Build Tool: Shadow-cljs
+
+Purpose: ClojureScript compilation and bundling
+
+Pros:
+- Modern, actively maintained
+- Excellent JavaScript interop
+- Fast compilation with hot-reload
+- Easy to configure for single-file output
+- Great optimization with Google Closure Compiler
+- Built-in support for npm packages
+- Superior dead code elimination (critical for file size)
+
+Cons:
+- Requires Node.js/npm ecosystem
+- Slightly different from traditional Leiningen workflow
+
+Alternatives:
+- lein-figwheel: Older, Leiningen-based, but proven track record
+- cljs.main: Minimal setup, but lacks features
+
+2. UI Framework: Reagent
+
+Purpose: React wrapper for building UI components
+
+Pros:
+- Minimalistic and easy to learn
+- Uses Hiccup syntax (Clojure data structures for HTML)
+- Small bundle size
+- Perfect for simple to medium complexity apps
+- Great documentation and community
+- Works seamlessly with React ecosystem
+
+Cons:
+- For complex state, you'll want Re-frame on top
+- Direct React interop requires some learning
+
+Alternatives:
+- Re-frame: Full framework built on Reagent (adds event handling, subscriptions)
+- Helix: More direct React mapping, smaller but less Clojure-idiomatic
+
+3. State Management: Re-frame (if app complexity grows)
+
+Purpose: Predictable state management for SPAs
+
+Pros:
+- Unidirectional data flow (like Redux)
+- Built on Reagent
+- Excellent for complex apps with lots of interactions
+- Great debugging with re-frame-10x
+- Clear separation of concerns
+
+Cons:
+- Learning curve for the event/subscription model
+- Might be overkill for simple apps
+- Adds ~50KB to bundle
+
+Alternatives:
+- Reagent atoms alone: Simpler, for basic state needs
+- DataScript: If you need query-based data access (interesting for Bible verses/search)
+
+4. CSS-in-CLJS: Garden
+
+Purpose: Generate CSS from Clojure data structures
+
+Pros:
+- Type-safe CSS
+- No separate CSS files needed (perfect for single HTML file)
+- Can inline all styles
+- Programmatic style generation
+- No build step for CSS
+
+Cons:
+- Another DSL to learn
+- Some CSS features require workarounds
+
+Alternatives:
+- Inline style maps: React-style inline styles, but limited
+- stylefy: Component-scoped styles
+- Plain CSS: Keep it simple, inline in HTML template
+
+5. Routing: Reitit or Secretary
+
+Purpose: Navigate between Bible books/chapters
+
+Pros (Reitit):
+- Modern, data-driven routing
+- Works well with Re-frame
+- Supports both frontend and backend routing
+- Good documentation
+
+Pros (Secretary):
+- Simpler, lightweight
+- Easy to understand
+- Good for basic routing needs
+
+Cons:
+- For a single-page Bible app, you might not even need routing (could use app state instead)
+
+6. Data Management: Consider DataScript
+
+Purpose: In-memory database for querying Bible text
+
+Pros:
+- Datalog queries are powerful for relational data
+- Great for searches (find all verses containing "love")
+- Immutable, time-travel debugging
+- Perfect for Bible cross-references
+
+Cons:
+- Learning curve for Datalog
+- Adds significant bundle size
+- Might be overkill if you just need simple verse lookup
+
+Alternatives:
+- Simple maps/vectors: Keep Bible data as EDN, query with regular Clojure functions
+- Lunr.js: If you need full-text search
+
+My Recommended Minimal Stack
+
+For your specific use case (single HTML file, offline Bible), I'd recommend:
+
+1. Shadow-cljs - Build tool (essential)
+2. Reagent - UI framework (start here, add Re-frame later if needed)
+3. Garden - CSS generation (keeps everything in one file)
+4. Simple Clojure data structures - For Bible data (start simple)
+5. Local state with Reagent atoms - State management (upgrade to Re-frame if complexity grows)
+
+This gives you a lean, fast-loading single HTML file while keeping the codebase maintainable.
+
+Optional Later Additions:
+
+- Re-frame: When you add features like bookmarks, notes, reading plans
+- DataScript: If you want advanced search/cross-reference features
+- Routing: If you want shareable URLs for specific passages
+**** my thoughts
+* Commands
+** ~npx shadow-cljs compile app~
+** ~clojure -M build.clj~
+i guess this is the production build
+* Tech stack
+1. Shadow-cljs - Build tool (essential)
+2. Reagent - UI framework (start here, add Re-frame later if needed)
+3. Garden - CSS generation (keeps everything in one file)
+4. Simple Clojure data structures - For Bible data (start simple)
+5. Local state with Reagent atoms - State management (upgrade to Re-frame if complexity grows)
+* Tasks
+** TODO Select tech stack
