@@ -1,0 +1,10 @@
+FROM docker.io/clojure:temurin-25-tools-deps-trixie
+#RUN apk add libgcc libstdc++ ripgrep
+#RUN apt update && apt install -y libgcc-s1 libstdc++6 ripgrep
+RUN apt update && apt install -y ripgrep curl
+
+# Only for development
+RUN curl -fsSL https://claude.ai/install.sh | bash -s latest
+#RUN npm install -g @anthropic-ai/claude-code
+
+WORKDIR /app
