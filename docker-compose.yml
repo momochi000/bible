@@ -7,9 +7,9 @@ services:
       - ./bible/:/app/
     #environment:
     #  - OPENAI_API_KEY=$OPENAI_API_KEY
-    #ports:
-    #  - "61799:61799"
+    ports:
+      - "8080:8080"
     tty: true
     stdin_open: true
-    #command: "lein repl :start :host 0.0.0.0 :port 61799"
+    command: "npx shadow-cljs watch app"
 

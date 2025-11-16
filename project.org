@@ -146,6 +146,8 @@ Optional Later Additions:
 ** ~npx shadow-cljs compile app~
 ** ~clojure -M build.clj~
 i guess this is the production build
+** ~npm run build:html~
+** ~npx shadow-cljs watch app~ start dev server on port 8080 with hot reload
 * Tech stack
 1. Shadow-cljs - Build tool (essential)
 2. Reagent - UI framework (start here, add Re-frame later if needed)
