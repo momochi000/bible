@@ -12,6 +12,7 @@ node_modules/
 target/
 #  - generated JavaScript from development builds
 bible/resources/public/js/
+bible/public
 
 out/
 
