@@ -43,4 +43,5 @@
   (mount-root))
 
 (defn ^:dev/after-load reload! []
+  (styles/inject-styles!)
   (mount-root))
