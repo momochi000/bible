@@ -20,7 +20,9 @@ The project is to create a (Christian) Bible app which is compiled into a single
 - **Start development server**: `npm run dev` or `npx shadow-cljs watch app` - starts dev server on port 8080 with hot-reload
 - **Compile for development**: `npm run compile` or `npx shadow-cljs compile app` - one-time development build
 - **Build production release**: `npm run build` or `npx shadow-cljs release app` - optimized build with advanced compilation
-- **Create single HTML file**: After running production build, run `./build-html.sh` or manually inline JS into HTML
+- **Create single HTML file**: `clojure -M:build` - generates self-contained HTML file at `target/bible.html` using Hiccup and Garden
+  - This step requires the production build to exist first
+  - **One-step complete build**: `npm run build:html` - builds JS and generates HTML in one command
 
 ### Testing
 - **Run tests**: `npx shadow-cljs compile test && npx shadow-cljs release test` (requires test build configuration)
@@ -47,17 +49,18 @@ The project is to create a (Christian) Bible app which is compiled into a single
 
 ### Project Structure
 ```
-├── deps.edn               # Clojure dependencies (Reagent, Garden)
+├── deps.edn               # Clojure dependencies (Reagent, Garden, Hiccup)
 ├── package.json           # npm dependencies (Shadow-cljs, React)
 ├── shadow-cljs.edn        # Shadow-cljs build configuration
-├── build-html.sh          # Script to create single HTML file
+├── build/
+│   └── build.clj          # Build script using Hiccup to generate HTML
 ├── src/
 │   └── bible/
 │       ├── core.cljs      # Main entry point with Reagent components
-│       └── styles.cljs    # Garden CSS definitions
+│       └── styles.cljs    # Garden CSS definitions (runtime)
 ├── resources/
 │   └── public/
-│       └── index.html     # HTML template
+│       └── index.html     # HTML template (for development server only)
 ├── target/
 │   ├── release/           # Production builds (main.js)
 │   └── bible.html         # Final single-file output
@@ -68,3 +71,23 @@ The project is to create a (Christian) Bible app which is compiled into a single
 - `shadow-cljs.edn`: Defines builds, source paths, and compiler options
 - `deps.edn`: Manages Clojure/ClojureScript library dependencies
 - `package.json`: Manages JavaScript dependencies (React, Shadow-cljs)
+
+### Build Process Architecture
+The build pipeline is fully Clojure-based:
+
+1. **ClojureScript Compilation** (`npm run build`):
+   - Shadow-cljs compiles ClojureScript to optimized JavaScript
+   - Output: `target/release/main.js` (~367KB)
+
+2. **HTML Generation** (`clojure -M:build`):
+   - `build/build.clj` uses **Hiccup** to generate HTML structure
+   - Garden generates CSS from Clojure data structures (defined in `build.clj`)
+   - JavaScript is inlined into `<script>` tag
+   - CSS is inlined into `<style>` tag
+   - Output: Single self-contained `target/bible.html` (~369KB)
+
+**Why this approach?**
+- Pure Clojure solution - no shell scripts or string manipulation
+- Type-safe HTML generation with Hiccup
+- Programmatic CSS with Garden
+- Easy to extend (add meta tags, inline data, etc.)
