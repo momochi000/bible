@@ -12,7 +12,9 @@
   "scripts": {
     "dev": "shadow-cljs watch app",
     "build": "shadow-cljs release app",
+    "build:debug": "shadow-cljs release app-debug",
     "compile": "shadow-cljs compile app",
-    "build:html": "npm run build && clojure -M:build"
+    "build:html": "npm run build && clojure -M:build release",
+    "build:html:debug": "npm run build:debug && clojure -M:build debug"
   }
 }
