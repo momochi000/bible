@@ -15,4 +15,14 @@
    :release {:output-dir "target/release"
              :compiler-options {:optimizations :advanced
                                 :pretty-print false
+                                :pseudo-names false}}}
+
+  :app-debug
+  {:target :browser
+   :output-dir "target/debug/js"
+   :asset-path "/js"
+   :modules {:main {:init-fn bible.core/init!}}
+   :release {:output-dir "target/debug"
+             :compiler-options {:optimizations :simple
+                                :pretty-print true
                                 :pseudo-names false}}}}}

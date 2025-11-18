@@ -147,6 +147,8 @@ Optional Later Additions:
 ** ~clojure -M build.clj~
 i guess this is the production build
 ** ~npm run build:html~
+build the release html
+all the code packaged and minified into a single html file
 ** ~npx shadow-cljs watch app~ start dev server on port 8080 with hot reload
 * Tech stack
 1. Shadow-cljs - Build tool (essential)
@@ -155,4 +157,7 @@ i guess this is the production build
 4. Simple Clojure data structures - For Bible data (start simple)
 5. Local state with Reagent atoms - State management (upgrade to Re-frame if complexity grows)
 * Tasks
-** TODO Select tech stack
+** DONE Select tech stack
+CLOSED: [2025-11-17 Mon 18:13]
+** TODO figure out how to store bible text
+** TODO initial view/layout/controls
