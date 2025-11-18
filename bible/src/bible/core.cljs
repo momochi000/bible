@@ -1,7 +1,8 @@
 (ns bible.core
   (:require [reagent.core :as r]
             [reagent.dom :as rdom]
-            [bible.styles :as styles]))
+            [bible.styles :as styles]
+            [bible.data :as data]))
 
 ;; App State
 (defonce app-state (r/atom {:current-book "Genesis"
@@ -24,8 +25,16 @@
      "Next →"]]])
 
 (defn verse-display []
-  [:div.verse-container
-   [:p "Sample verse text will go here..."]])
+  (let [chapter (data/get-chapter (:current-book @app-state)
+                                   (:current-chapter @app-state))]
+    [:div.verse-container
+     (if chapter
+       (for [verse (:verses chapter)]
+         ^{:key (:verse verse)}
+         [:p
+          [:strong (str (:verse verse) ". ")]
+          (:text verse)])
+       [:p "Loading..."])]))
 
 (defn root-component []
   [:div#main-container
@@ -39,6 +48,7 @@
                (js/document.getElementById "app")))
 
 (defn init! []
+  (data/load-bible-json!)
   (styles/inject-styles!)
   (mount-root))
 
