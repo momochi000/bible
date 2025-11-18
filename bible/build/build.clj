@@ -22,6 +22,19 @@
      [:script js-content]]))
 
 (defn build-single-html
+  "Usage Examples
+
+  ;; Called with no args - uses default
+  (build-single-html)
+    → Calls (build-single-html "release")
+    → Builds from target/release/main.js
+    → Creates target/bible-release.html
+
+  ;; Called with explicit arg
+  (build-single-html "debug")
+    → Uses "debug" as build-type
+    → Builds from target/debug/main.js
+    → Creates target/bible-debug.html"
   ([] (build-single-html "release"))
   ([build-type]
    (println (str "Building single HTML file with Hiccup (" build-type " mode)..."))

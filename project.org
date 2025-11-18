@@ -159,5 +159,6 @@ all the code packaged and minified into a single html file
 * Tasks
 ** DONE Select tech stack
 CLOSED: [2025-11-17 Mon 18:13]
-** TODO figure out how to store bible text
+** DONE figure out how to store bible text
+CLOSED: [2025-11-17 Mon 21:20]
 ** TODO initial view/layout/controls
