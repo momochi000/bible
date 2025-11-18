@@ -11,8 +11,7 @@ node_modules/
 #  - build outputs
 target/
 #  - generated JavaScript from development builds
-bible/resources/public/js/
-bible/resources
+bible/resources/public*
 bible/public
 
 out/
