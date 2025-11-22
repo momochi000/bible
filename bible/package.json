@@ -15,6 +15,7 @@
     "build:debug": "shadow-cljs release app-debug",
     "compile": "shadow-cljs compile app",
     "build:html": "npm run build && clojure -M:build release",
-    "build:html:debug": "npm run build:debug && clojure -M:build debug"
+    "build:html:debug": "npm run build:debug && clojure -M:build debug",
+    "build:dev-html": "clojure -M:build dev"
   }
 }
