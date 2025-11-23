@@ -10,19 +10,17 @@
                             :current-verse nil}))
 
 ;; Components
-(defn header []
-  [:header
-   [:h1 "Bible Reader"]
-   [:p "A self-contained offline Bible"]])
-
 (defn navigation []
   [:nav
    [:div
     [:button {:on-click #(js/console.log "Previous Chapter")}
      "← Previous"]
     [:span (str (:current-book @app-state) " " (:current-chapter @app-state))]
-    [:button {:on-click #(js/console.log "Next Chapter")}
+    [:button {:on-click #(swap! app-state update :current-chapter inc)}
      "Next →"]]])
+
+(defn header []
+  [:header [navigation]])
 
 (defn verse-display []
   (let [chapter (data/get-chapter (:current-book @app-state)
@@ -39,7 +37,6 @@
 (defn root-component []
   [:div#main-container
    [header]
-   [navigation]
    [verse-display]])
 
 ;; Initialization
