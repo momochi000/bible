@@ -150,6 +150,26 @@ i guess this is the production build
 build the release html
 all the code packaged and minified into a single html file
 ** ~npx shadow-cljs watch app~ start dev server on port 8080 with hot reload
+** Connecting to the repl IMPORTANT
++ Run the dev server (which watches) using ~docker compose up~
+  This runs ~npx shadow-cljs watch app~
++ In another terminal, connect to the same container
+  ~docker exec -it <container id> npx shadow-cljs clj-repl~
++ run ~(shadow/watch-compile-all!)~
+  you should see "compiling" in the watch terminal window
++ run ~(shadow/repl :app)~
+
+now i seem to be able to ~require~ my cljs project code
+
+note that ~app~ referenced above is coming from the ~shadow-cljs.edn~ build definition file which lists my builds as ~app~
+
+I've set up a make command to make this slightly smoother:
++ ~docker ps~ copy the container id of the running dev app watcher
++ ~CONTAINER_ID=<paste> make repl~
++ run ~(shadow/watch-compile-all!)~
++ run ~(shadow/repl :app)~
+
+
 * Tech stack
 1. Shadow-cljs - Build tool (essential)
 2. Reagent - UI framework (start here, add Re-frame later if needed)
