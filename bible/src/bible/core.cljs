@@ -1,18 +1,16 @@
 (ns bible.core
-  (:require [reagent.core :as r]
-            [reagent.dom :as rdom]
+  (:require [reagent.dom :as rdom]
+            [bible.state :refer [app-state]]
             [bible.styles :as styles]
-            [bible.data :as data]))
-
-;; App State
-(defonce app-state (r/atom {:current-book "Genesis"
-                            :current-chapter 1
-                            :current-verse nil}))
+            [bible.data :as data]
+            [bible.ui-components.jump :refer [book-chapter-verse]]
+            ))
 
 ;; Components
 (defn navigation []
   [:nav
    [:div
+    [book-chapter-verse]
     [:button {:on-click #(js/console.log "Previous Chapter")}
      "← Previous"]
     [:span (str (:current-book @app-state) " " (:current-chapter @app-state))]
