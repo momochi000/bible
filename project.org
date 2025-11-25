@@ -181,4 +181,7 @@ I've set up a make command to make this slightly smoother:
 CLOSED: [2025-11-17 Mon 18:13]
 ** DONE figure out how to store bible text
 CLOSED: [2025-11-17 Mon 21:20]
-** TODO initial view/layout/controls
+** DONE initial view/layout/controls
+CLOSED: [2025-11-23 Sun 11:05]
+** TODO When choosing a book from the dropdown, reset chapter and verse
+or 1, whatever. But only if changing to a different book
