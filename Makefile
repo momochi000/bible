@@ -1,6 +1,9 @@
 build:
 	docker compose build
 
+build-dev-html:
+	docker compose run --rm bible bash -c 'npm run build:dev-html'
+
 shell:
 	docker compose run --rm bible bash
 

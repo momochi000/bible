@@ -35,9 +35,9 @@
      [:style {:id "app-styles"} css-content]
      [:script {:type "application/json" :id "bible-data"} bible-json]]
     [:body
-     [:div#app]
-     [:div {:style "padding: 20px; text-align: center;"}
-      [:p "Loading Bible..."]]
+     [:div#app
+      [:div {:style "padding: 20px; text-align: center;"}
+       [:p "Loading Bible..."]]]
      [:script {:src "/js/main.js"}]]))
 
 (defn build-single-html
