@@ -27,4 +27,8 @@
     [:span
      {:font-weight "bold"
       :font-size "1.1em"
-      :color "#2c3e50"}]]])
+      :color "#2c3e50"}]
+    ]
+   [:nav.bible-top-nav
+    [:select {:height "2rem"}]
+    ]])

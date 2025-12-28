@@ -8,7 +8,7 @@
 
 ;; Components
 (defn navigation []
-  [:nav
+  [:nav {:class "bible-top-nav"}
    [:div
     [:button {:on-click #(swap! app-state update :current-chapter dec)} "← Prev"]
     [book-chapter-verse]
