@@ -4,5 +4,4 @@
 ;; App State
 (defonce app-state (r/atom {:current-book "Genesis"
                             :current-chapter 1
-                            :current-verse nil}))
-
+                            :current-verse 1}))
