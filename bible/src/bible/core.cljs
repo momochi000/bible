@@ -4,16 +4,24 @@
             [bible.styles :as styles]
             [bible.data :as data]
             [bible.ui-components.jump :refer [book-chapter-verse]]
+            [bible.api.jump :refer [move-previous-chapter!]]
             ))
 
 ;; Components
+(defn- handle-prev-chapter
+  [evt]
+  (move-previous-chapter!))
+
+(defn- handle-next-chapter
+  [evt]
+  (swap! app-state update :current-chapter inc))
+
 (defn navigation []
   [:nav {:class "bible-top-nav"}
    [:div
-    [:button {:on-click #(swap! app-state update :current-chapter dec)} "← Prev"]
+    [:button {:on-click handle-prev-chapter} "← Prev"]
     [book-chapter-verse]
-    [:button {:on-click #(swap! app-state update :current-chapter inc)}
-     "Next →"]]])
+    [:button {:on-click handle-next-chapter} "Next →"]]])
 
 (defn header []
   [:header [navigation]])

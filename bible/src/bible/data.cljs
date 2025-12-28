@@ -71,6 +71,7 @@
    "Jude"
    "Revelation"])
 
+
 (defn load-bible-json! []
   "Load and parse the Bible JSON from the HTML script tag"
   (when-let [bible-element (js/document.getElementById "bible-data")]
@@ -103,7 +104,7 @@
 
 (defn get-book-names []
   "Get list of all book names"
-  (mapv :name (:books @bible-data)))
+  bible-book-list)
 
 (defn get-chapters-in-book
   [book-name]
