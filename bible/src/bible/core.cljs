@@ -10,9 +10,8 @@
 (defn navigation []
   [:nav
    [:div
+    [:button {:on-click #(swap! app-state update :current-chapter dec)} "← Prev"]
     [book-chapter-verse]
-    ;;[:button {:on-click #(js/console.log "Previous Chapter")} "← Previous"]
-    [:span (str (:current-book @app-state) " " (:current-chapter @app-state))]
     [:button {:on-click #(swap! app-state update :current-chapter inc)}
      "Next →"]]])
 

@@ -33,5 +33,6 @@
 (defn book-chapter-verse
   "Render the controls to jump between book/chapter/verses"
   []
-  [book app-state]
-  [chapter app-state])
+  [:div
+   [book app-state]
+   [chapter app-state]])
