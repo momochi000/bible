@@ -141,15 +141,288 @@ Optional Later Additions:
 - Re-frame: When you add features like bookmarks, notes, reading plans
 - DataScript: If you want advanced search/cross-reference features
 - Routing: If you want shareable URLs for specific passages
-**** my thoughts
+*** data persistence
+**** LocalStorage
+**** IndexedDB
+Why IndexedDB for Your Use Case
+
+LocalStorage Problems:
+- 5-10MB limit (could run out with lots of notes)
+- No indexing/querying (have to load everything to find a note)
+- Synchronous (can block UI with large data)
+- Only stores strings (need manual serialization)
+
+IndexedDB Benefits:
+- 50MB+ storage (can be gigabytes with user permission)
+- Indexed queries (find all notes for Genesis chapter 3)
+- Asynchronous (won't block UI)
+- Stores structured data natively
+
+Key Considerations
+
+1. Schema Design
+
+You'll need to think about your data structure:
+
+;; Example schema
+{:bookmarks [{:id "uuid-1"
+              :book "Genesis"
+              :chapter 3
+              :verse 15
+              :timestamp 1234567890}]
+
+ :highlights [{:id "uuid-2"
+               :book "John"
+               :chapter 3
+               :verse 16
+               :color "yellow"
+               :text "For God so loved..."}]
+
+ :notes [{:id "uuid-3"
+          :book "Romans"
+          :chapter 8
+          :verse 28
+          :content "Great verse about providence"
+          :created 1234567890
+          :updated 1234567891}]}
+
+2. Indexes for Queries
+
+You'll want indexes on:
+- [book, chapter, verse] - "Show me all annotations for Genesis 1:1"
+- timestamp - "Show my recent bookmarks"
+- book - "Show all my notes in Romans"
+
+3. Library Recommendations
+
+Don't use raw IndexedDB API - it's callback hell. Use a library:
+
+Option A: Datascript (Excellent for ClojureScript)
+
+- In-memory database with Datalog queries
+- Can persist to IndexedDB
+- Amazing query power
+- Perfect for relational data
+
+;; Example Datascript query
+(d/q '[:find ?verse ?note
+       :where
+       [?e :note/book "Genesis"]
+       [?e :note/chapter 1]
+       [?e :note/verse ?verse]
+       [?e :note/content ?note]]
+     @conn)
+
+Option B: Konserve
+
+- Simple key-value store abstraction
+- IndexedDB backend for browser
+- Async/promise-based
+- Less powerful queries but simpler
+
+Option C: idb (JavaScript library)
+
+- Thin wrapper around IndexedDB
+- Promise-based
+- Can use from ClojureScript via interop
+
+4. Migration Strategy
+
+Plan for schema changes:
+(def schema-version 1)
+
+(defn migrate-if-needed! []
+  (let [stored-version (get-stored-version)]
+    (when (< stored-version schema-version)
+      (run-migrations! stored-version schema-version))))
+
+5. Sync Considerations
+
+If you ever want to sync across devices:
+- Generate UUIDs for all items
+- Track creation/modification timestamps
+- Design for eventual consistency
+
+6. Export/Backup
+
+Since it's IndexedDB, users can't easily see their data. Provide:
+(defn export-all-data! []
+  "Export all notes/bookmarks as JSON file"
+  ...)
+
+(defn import-data! [json-file]
+  "Import from backup"
+  ...)
+
+My Recommendation
+
+Start with Datascript:
+
+;; In deps.edn or shadow-cljs.edn
+:dependencies [[datascript "1.6.5"]
+               [datascript-transit "0.3.0"]]
+
+Pros:
+- Idiomatic ClojureScript
+- Powerful Datalog queries
+- Easy to test (just data)
+- Great for complex relationships
+- Can export entire DB as EDN
+
+Basic setup:
+(ns bible.db
+  (:require [datascript.core :as d]))
+
+(def schema
+  {:bookmark/book {:db/index true}
+   :bookmark/chapter {:db/index true}
+   :bookmark/verse {:db/index true}
+   :note/book {:db/index true}
+   :note/chapter {:db/index true}})
+
+(defonce conn (d/create-conn schema))
+
+;; Persist to IndexedDB
+(defn save-db! []
+  (let [serialized (d/serializable @conn)]
+    ;; Store in IndexedDB
+    ))
+**** URL hash/query params
+**** sqlite3 wasm
+https://sqlite.org/wasm/doc/trunk/demo-123.md
+*** sql options
+this is not for the bible app but considering it for future apps:
+
+
+Ok great overview! thank you for the detailed information. Yes I think that gives me good options depending on the use case: for this bible app, there won't be complex data that needs to be stored/filed, and queried. Just my own personal notes, bookmarks, and highlights. However, for other apps I have in mind, there may be use cases for complex data requirements. In those cases the option of sql in the browser makes perfect sense. I want to dig a bit deeper on this
+one question: you mentioned sql.js but also sqlite's official wasm build. Why would I choose sql.js over the official build?
+
+Excellent question! This is an important distinction. Let me break down the real differences:
+
+sql.js (Community Project)
+
+History: Created ~2013, predates official WASM support
+
+Pros:
+- Mature, battle-tested in production
+- npm package: npm install sql.js
+- API designed for JavaScript/browser from day one
+- Good documentation with browser examples
+- Easier to get started
+- Lots of Stack Overflow answers
+
+Cons:
+- Lags behind SQLite releases (might be on SQLite 3.41 when 3.45 is out)
+- Community maintained (though well maintained)
+- Additional abstraction layer
+
+SQLite Official WASM (sqlite.org)
+
+History: Released 2022, official from SQLite team
+
+Pros:
+- Official support from SQLite developers
+- Most up-to-date SQLite features
+- Direct SQLite C API (no abstraction loss)
+- Will always track latest SQLite
+- Likely more performant (fewer layers)
+
+Cons:
+- API is more C-like/lower-level
+- Documentation assumes C knowledge
+- Newer, less community resources
+- More manual setup required
+- Not on npm (load from CDN or self-host)
+
+Code Comparison
+
+sql.js (Simpler)
+
+const SQL = await initSqlJs();
+const db = new SQL.Database();
+db.run("CREATE TABLE test (id, name)");
+db.run("INSERT INTO test VALUES (?, ?)", [1, "Alice"]);
+const result = db.exec("SELECT * FROM test");
+console.log(result); // [{columns: [...], values: [...]}]
+
+SQLite Official WASM (More Complex)
+
+const sqlite3 = await sqlite3InitModule();
+const db = new sqlite3.oo1.DB();
+db.exec("CREATE TABLE test (id, name)");
+db.exec({
+  sql: "INSERT INTO test VALUES (?, ?)",
+  bind: [1, "Alice"]
+});
+db.exec({
+  sql: "SELECT * FROM test",
+  callback: (row) => console.log(row)
+});
+
+  When to Choose Each
+
+Choose sql.js if:
+
+- You want to get started quickly
+- You prefer npm packages
+- You want simpler, JavaScript-friendly API
+- You need good tutorials/examples
+- You're building a prototype
+- Current SQLite features are sufficient
+
+Choose Official WASM if:
+
+- You need bleeding-edge SQLite features
+- You want official support guarantee
+- You're comfortable with lower-level APIs
+- Performance is critical
+- You want to match desktop SQLite exactly
+- Long-term project where tracking latest SQLite matters
+
+My Recommendation for Your Use Case
+
+For single-file apps with notes/bookmarks, I'd actually suggest sql.js:
+
+Reasons:
+1. Simpler ClojureScript interop - more JS-friendly API
+2. npm install - easier to bundle with shadow-cljs
+3. Faster development - less boilerplate
+4. Mature - bugs are worked out
+5. Good enough - you don't need SQLite's latest JSON functions or window functions for notes
+
+Example shadow-cljs.edn:
+:dependencies [[reagent "1.2.0"]
+               [garden "1.3.10"]
+               ["sql.js" "1.10.3"]]  ;; Just add this!
+
+If You Were Building Something More Complex
+
+Like a local-first CRM or offline analytics app, then I'd lean toward official WASM for:
+- Better performance at scale
+- Latest window functions/JSON support
+- Guarantee of long-term support
+
+Hybrid Approach?
+
+You could even:
+1. Start with sql.js for rapid development
+2. Switch to official WASM later if needed (SQL is portable!)
+3. The queries stay the same, just swap the driver
+
+Bottom Line
+
+For your Bible app and similar single-file apps: sql.js is the pragmatic choice. It's easier to work with and more than powerful enough. The official WASM is better for edge cases or if you specifically need cutting-edge SQLite features.
+** structure of bible.json
+#+begin_src json
+{"books": [
+    {"chapter": 1,
+    "verses": [
+        {"verse": 1,
+        "text": "..."}
+    ]}
+]}
+#+end_src
 * Commands
-** ~npx shadow-cljs compile app~
-** ~clojure -M build.clj~
-i guess this is the production build
-** ~npm run build:html~
-build the release html
-all the code packaged and minified into a single html file
-** ~npx shadow-cljs watch app~ start dev server on port 8080 with hot reload
 ** Connecting to the repl IMPORTANT
 + Run the dev server (which watches) using ~docker compose up~
   This runs ~npx shadow-cljs watch app~
@@ -170,6 +443,13 @@ I've set up a make command to make this slightly smoother:
 + run ~(shadow/repl :app)~
 
 
+** ~npx shadow-cljs compile app~
+** ~clojure -M build.clj~
+i guess this is the production build
+** ~npm run build:html~
+build the release html
+all the code packaged and minified into a single html file
+** ~npx shadow-cljs watch app~ start dev server on port 8080 with hot reload
 * Tech stack
 1. Shadow-cljs - Build tool (essential)
 2. Reagent - UI framework (start here, add Re-frame later if needed)
@@ -183,5 +463,9 @@ CLOSED: [2025-11-17 Mon 18:13]
 CLOSED: [2025-11-17 Mon 21:20]
 ** DONE initial view/layout/controls
 CLOSED: [2025-11-23 Sun 11:05]
-** TODO When choosing a book from the dropdown, reset chapter and verse
+** DONE When choosing a book from the dropdown, reset chapter and verse
+CLOSED: [2025-11-29 Sat 13:42]
 or 1, whatever. But only if changing to a different book
+** TODO update ai-dev doc with tech stack info
+** TODO upload to github
+fully GPL open source

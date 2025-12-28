@@ -19,7 +19,6 @@
 
 (defn- handle-change-chapter
   [evt]
-  (print "DEBUG: handle-change-chapter called, can we get the state properly here? -------------> " (:current-chapter @app-state))
   (change-chapter! app-state (-> evt .-target .-value)))
 
 (defn- chapter
