@@ -57,7 +57,8 @@ The project is to create a (Christian) Bible app which is compiled into a single
 │       └── styles.cljs    # Garden CSS definitions (runtime)
 ├── resources/
 │   └── public/
-│       └── index.html     # HTML template (for development server only)
+│       ├── index.html     # HTML template (for development server only)
+│       └── bible.json     # raw bible data (compiled ahead of time separately using scripts/parse_bible.clj
 ├── target/
 │   ├── release/           # Production builds (main.js)
 │   └── bible.html         # Final single-file output
@@ -74,17 +75,66 @@ The build pipeline is fully Clojure-based:
 
 1. **ClojureScript Compilation** (`npm run build`):
    - Shadow-cljs compiles ClojureScript to optimized JavaScript
-   - Output: `target/release/main.js` (~367KB)
+   - Output: `target/release/main.js`
 
 2. **HTML Generation** (`clojure -M:build`):
    - `build/build.clj` uses **Hiccup** to generate HTML structure
    - Garden generates CSS from Clojure data structures (defined in `build.clj`)
    - JavaScript is inlined into `<script>` tag
    - CSS is inlined into `<style>` tag
-   - Output: Single self-contained `target/bible.html` (~369KB)
+   - Output: Single self-contained `target/bible.html`
 
 **Why this approach?**
 - Pure Clojure solution - no shell scripts or string manipulation
 - Type-safe HTML generation with Hiccup
 - Programmatic CSS with Garden
 - Easy to extend (add meta tags, inline data, etc.)
+
+**Details and process**
+The bible content itself is stored in `resources/kjv.txt`. This is parsed and processed into a json stored in `resources/bible.json` which is then included into the html template. The script which handles this is in `scripts/parse_bible.clj`. The html template includes boilerplate such as the outermost `<html>` tags and metadata and the react app is injected into it. So, the process is:
+
+- Parse bible text into json
+- Generate html template including bible json data
+- Run clojurescript app which generates html/js and inject into html template
+
+### App execution structure
+On page load the following happens:
+1. The raw bible data as bible.json is loaded into an atom named `bible-data`
+2. The app state is set at the start of the bible in an atom which is a map
+   it looks like this: `{:current-book "Genesis" :current-chapter 1 :current-verse 1}`
+3. The react app is loaded into the html template
+
+
+### Data structure
+The raw bible data in bible.json has the following shape:
+```json
+{
+  "books": [
+    {
+      "name": "Genesis",
+      "chapters": [ {
+        "chapter": 1,
+        "verses":[ {
+          "verse": 1,
+          "text": "..."
+        }, {
+          "verse": 2,
+          "text": "..."
+        }]
+      }, {
+        ...
+      }]
+    }, {
+      "name": "Exodus",
+      ...
+    }
+  ]
+}
+```
+
+the app state is stored in an atom named `app-state` and is defined intially as follows:
+```clojure
+(defonce app-state (r/atom {:current-book "Genesis"
+                            :current-chapter 1
+                            :current-verse 1}))
+```
