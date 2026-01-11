@@ -473,11 +473,14 @@ CLOSED: [2025-12-28 Sun 11:39]
 ** DONE smarter prev and next buttons
 CLOSED: [2026-01-10 Sat 19:44]
 check to see if going out of bounds
-** TODO style book and chapter dropdowns
-to look better than the native droplist
 ** TODO upload to github
 fully GPL open source
+** TODO test out on actual device
+** TODO Add bookmarking
+this will require the architecture (and get the ball rolling) on long term local storage
 ** TODO complete top nav
 design of the nav so that i can type in the book name and get autocomplete
 
 should also be able to type in the chapter number
+** TODO style book and chapter dropdowns
+to look better than the native droplist
