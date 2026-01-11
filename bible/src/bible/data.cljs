@@ -110,10 +110,16 @@
   [book-name]
   (:chapters (get-book book-name)))
 
+(defn get-chapter-numbers-in-book
+  "Return the list of chapters in the given book as a sequence of numbers"
+  [book-name]
+  (let [chapters (get-chapters-in-book book-name)]
+    (take (count chapters) (iterate inc 1))))
+
 (defn get-chapter-names-in-book
   "Return the list of chapters (which are just numbers) as a sequence of strings given the argument book"
   [book-name]
-  (take (count (get-chapters-in-book book-name)) (map str (iterate inc 1))))
+  (map str (get-chapter-numbers-in-book book-name)))
 
 (defn get-verses-in-chapter
   "Given a book and a chapter, return the list of verses in that book/chapter"

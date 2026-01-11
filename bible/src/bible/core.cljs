@@ -4,19 +4,17 @@
             [bible.styles :as styles]
             [bible.data :as data]
             [bible.ui-components.jump :refer [book-chapter-verse]]
-            [bible.api.jump :refer [move-previous-chapter!]]
+            [bible.api.jump :refer [move-previous-chapter! move-next-chapter!]]
             ))
 
-;; UI Components
+;; Core UI Components
 (defn- handle-prev-chapter
   [evt]
   (move-previous-chapter!))
 
 (defn- handle-next-chapter
   [evt]
-  ;; TODO: This needs to smartly handle moving chapters
-  ;; e.g. if we're on the last chapter of a book we need to jump to the first chapter of the next book
-  (swap! app-state update :current-chapter inc))
+  (move-next-chapter!))
 
 (defn navigation []
   [:nav {:class "bible-top-nav"}

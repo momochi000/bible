@@ -470,7 +470,8 @@ CLOSED: [2025-12-28 Sun 11:27]
 CLOSED: [2025-12-28 Sun 11:27]
 ** DONE update ai-dev doc with tech stack info
 CLOSED: [2025-12-28 Sun 11:39]
-** TODO smarter prev and next buttons
+** DONE smarter prev and next buttons
+CLOSED: [2026-01-10 Sat 19:44]
 check to see if going out of bounds
 ** TODO style book and chapter dropdowns
 to look better than the native droplist
