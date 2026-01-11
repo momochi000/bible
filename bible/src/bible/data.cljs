@@ -111,6 +111,19 @@
   (:chapters (get-book book-name)))
 
 (defn get-chapter-names-in-book
-  "Return the list of chapters (which are just numbers) as a sequence given the argument book"
+  "Return the list of chapters (which are just numbers) as a sequence of strings given the argument book"
   [book-name]
   (take (count (get-chapters-in-book book-name)) (map str (iterate inc 1))))
+
+(defn get-verses-in-chapter
+  "Given a book and a chapter, return the list of verses in that book/chapter"
+  [book-name chapter-number]
+  (:verses (get-chapter book-name chapter-number)))
+
+(defn get-verse-numbers-in-chapter
+  "Given a book and a chapter, return the list of verses as a list of numbers
+  i.e. it doesn't include the verse text, just the number of the verses"
+  [book-name chapter-number]
+  (mapv
+    #(:verse %)
+    (get-verses-in-chapter book-name chapter-number)))

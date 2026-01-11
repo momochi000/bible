@@ -6,7 +6,7 @@
 
 (defn- handle-change-book
   [evt]
-  (change-book! app-state (-> evt .-target .-value)))
+  (change-book! (-> evt .-target .-value)))
 
 (defn- book
   "construct/render an object for a select list of all the bible books with the current book selected"
@@ -19,7 +19,7 @@
 
 (defn- handle-change-chapter
   [evt]
-  (change-chapter! app-state (-> evt .-target .-value)))
+  (change-chapter! (-> evt .-target .-value)))
 
 (defn- chapter
   [app-state]
