@@ -479,7 +479,8 @@ CLOSED: [2026-01-10 Sat 21:38]
 fully GPL open source
 ** DONE test out on actual device
 CLOSED: [2026-01-10 Sat 21:38]
-** TODO Add bookmarking
+** DONE Add bookmarking
+CLOSED: [2026-01-31 Sat 16:26]
 this will require the architecture (and get the ball rolling) on long term local storage
 *** DONE setting up datascript
 CLOSED: [2026-01-31 Sat 14:36]
@@ -827,7 +828,8 @@ CLOSED: [2026-01-31 Sat 14:36]
   5. ✅ Added updated-at for reading-position
   6. ✅ Added updated-at for tags
   7. ✅ Removed :tag {:db/index true} typo
-*** TODO test
+*** DONE test
+CLOSED: [2026-01-31 Sat 16:26]
 How to Test
 
 Start your app:
@@ -844,7 +846,8 @@ bible.repositories.database.add_bookmark_BANG_("Genesis", 1, 1)
 bible.repositories.database.get_bookmarks()
 
 // Refresh page - bookmark should persist!
-** TODO psalms does not load :bug:
+** DONE psalms does not load :bug:
+CLOSED: [2026-01-31 Sat 16:56]
 ** TODO going back doesn't correctly load the last chapter :bug:
 
 e.g.
@@ -852,6 +855,8 @@ e.g.
 2. press back
 3. doesnt end up on genesis 50
    instead ends up on 40 for some reason
+** TODO Add bookmarking UI/UX
+** TODO build debug mode UI
 ** TODO complete top nav
 design of the nav so that i can type in the book name and get autocomplete
 
