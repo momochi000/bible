@@ -48,14 +48,13 @@
 (defn move-prev-book!
   "Change the current book to the previous one. If Genesis, then do nothing"
   []
-  (let [ curr-book (:current-book @app-state)
+  (let [curr-book (:current-book @app-state)
+        prev-book (previous-value (get-book-names) curr-book)
         last-chapter (->
-                      (last (get-chapter-numbers-in-book curr-book))
-                      (js/parseInt))
-        ]
+                      (last (get-chapter-numbers-in-book prev-book))
+                      (js/parseInt))]
 
-  (swap! app-state assoc :current-book
-           (previous-value (get-book-names) curr-book))
+  (swap! app-state assoc :current-book prev-book)
     ;; move to the last chapter of that book
     (swap! app-state assoc :current-chapter last-chapter)
     ;; move to the last verse of that chapter

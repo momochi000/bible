@@ -848,7 +848,8 @@ bible.repositories.database.get_bookmarks()
 // Refresh page - bookmark should persist!
 ** DONE psalms does not load :bug:
 CLOSED: [2026-01-31 Sat 16:56]
-** TODO going back doesn't correctly load the last chapter :bug:
+** DONE going back doesn't correctly load the last chapter :bug:
+CLOSED: [2026-01-31 Sat 17:10]
 
 e.g.
 1. goto exodus 1
