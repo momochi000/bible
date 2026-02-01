@@ -4,8 +4,8 @@ build:
 build-dev-html:
 	docker compose run --rm bible bash -c 'npm run build:dev-html'
 
-shell:
-	docker compose run --rm bible bash
+claude:
+	docker compose run --rm bible bash -c 'claude'
 
 compile:
 	docker compose run --rm bible bash -c 'npx shadow-cljs compile app'
@@ -14,7 +14,10 @@ debug-release:
 	docker compose run --rm bible bash -c 'npm run build:html:debug'
 
 release:
-	docker compose run --rm bible bash -c 'npx shadow-cljs release app'
+	docker compose run --rm bible bash -c 'npm run build:html'
+
+shell:
+	docker compose run --rm bible bash
 
 up:
 	docker compose up
