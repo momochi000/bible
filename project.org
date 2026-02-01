@@ -290,6 +290,7 @@ Basic setup:
 **** URL hash/query params
 **** sqlite3 wasm
 https://sqlite.org/wasm/doc/trunk/demo-123.md
+**** using
 *** sql options
 this is not for the bible app but considering it for future apps:
 
@@ -473,11 +474,384 @@ CLOSED: [2025-12-28 Sun 11:39]
 ** DONE smarter prev and next buttons
 CLOSED: [2026-01-10 Sat 19:44]
 check to see if going out of bounds
-** TODO upload to github
+** DONE upload to github
+CLOSED: [2026-01-10 Sat 21:38]
 fully GPL open source
-** TODO test out on actual device
+** DONE test out on actual device
+CLOSED: [2026-01-10 Sat 21:38]
 ** TODO Add bookmarking
 this will require the architecture (and get the ball rolling) on long term local storage
+*** DONE setting up datascript
+CLOSED: [2026-01-31 Sat 14:36]
+#+begin_quote
+Here are the steps to set up Datascript with IndexedDB persistence:
+
+  Step 1: Define Your Schema
+
+  Create a namespace for your database (e.g., src/bible/db.cljs):
+
+  (ns bible.db
+    (:require [datascript.core :as d]))
+
+  (def schema
+    {:bookmark/id {:db/unique :db.unique/identity}
+     :bookmark/book {:db/index true}
+     :bookmark/chapter {:db/index true}
+     :bookmark/verse {:db/index true}
+     :bookmark/timestamp {:db/index true}
+
+     :note/id {:db/unique :db.unique/identity}
+     :note/book {:db/index true}
+     :note/chapter {:db/index true}
+     :note/verse {:db/index true}
+     :note/content {}
+     :note/created {:db/index true}})
+
+  Step 2: Create IndexedDB Helper Functions
+
+  IndexedDB is async, so you'll use promises:
+
+  (defn save-to-indexeddb! [db-name data]
+    (js/Promise.
+     (fn [resolve reject]
+       (let [request (.open js/indexedDB "bible-app" 1)]
+         (set! (.-onupgradeneeded request)
+               (fn [e]
+                 (let [db (.. e -target -result)]
+                   (.createObjectStore db "datascript"))))
+         (set! (.-onsuccess request)
+               (fn [e]
+                 (let [db (.. e -target -result)
+                       tx (.transaction db #js ["datascript"] "readwrite")
+                       store (.objectStore tx "datascript")]
+                   (.put store data db-name)
+                   (set! (.-oncomplete tx) #(resolve true))
+                   (set! (.-onerror tx) reject))))
+         (set! (.-onerror request) reject)))))
+
+  (defn load-from-indexeddb! [db-name]
+    (js/Promise.
+     (fn [resolve reject]
+       (let [request (.open js/indexedDB "bible-app" 1)]
+         (set! (.-onupgradeneeded request)
+               (fn [e]
+                 (let [db (.. e -target -result)]
+                   (.createObjectStore db "datascript"))))
+         (set! (.-onsuccess request)
+               (fn [e]
+                 (let [db (.. e -target -result)
+                       tx (.transaction db #js ["datascript"] "readonly")
+                       store (.objectStore tx "datascript")
+                       get-req (.get store db-name)]
+                   (set! (.-onsuccess get-req)
+                         #(resolve (.. % -target -result)))
+                   (set! (.-onerror get-req) reject))))
+         (set! (.-onerror request) reject)))))
+
+  Step 3: Initialize Connection with Persistence
+
+  (defonce conn (atom nil))
+
+  (defn serialize-db [db]
+    (pr-str (d/serializable db)))
+
+  (defn deserialize-db [schema serialized-str]
+    (when serialized-str
+      (d/conn-from-serializable schema (cljs.reader/read-string serialized-str))))
+
+  (defn init-db! []
+    (-> (load-from-indexeddb! "main-db")
+        (.then (fn [stored-data]
+                 (if stored-data
+                   ;; Load existing database
+                   (reset! conn (deserialize-db schema stored-data))
+                   ;; Create new database
+                   (reset! conn (d/create-conn schema)))
+                 (js/console.log "Database initialized")))
+        (.catch (fn [error]
+                  (js/console.error "Failed to load DB:" error)
+                  ;; Fallback to new database
+                  (reset! conn (d/create-conn schema))))))
+
+  Step 4: Auto-Save on Changes
+
+  (defn save-db! []
+    (when @conn
+      (-> (save-to-indexeddb! "main-db" (serialize-db @@conn))
+          (.catch #(js/console.error "Failed to save DB:" %)))))
+
+  ;; Listen to all transactions and auto-save
+  (defn start-auto-save! []
+    (d/listen! @conn :persistence
+               (fn [tx-report]
+                 (save-db!))))
+
+  Step 5: Basic Operations
+
+  ;; Add a bookmark
+  (defn add-bookmark! [book chapter verse]
+    (d/transact! @conn [{:bookmark/id (random-uuid)
+                         :bookmark/book book
+                         :bookmark/chapter chapter
+                         :bookmark/verse verse
+                         :bookmark/timestamp (.now js/Date)}]))
+
+  ;; Query bookmarks
+  (defn get-bookmarks []
+    (d/q '[:find ?book ?chapter ?verse
+           :where
+           [?e :bookmark/book ?book]
+           [?e :bookmark/chapter ?chapter]
+           [?e :bookmark/verse ?verse]]
+         @@conn))
+
+  Step 6: Initialize in Your App
+
+  In your main app file:
+
+  (ns bible.core
+    (:require [bible.db :as db]))
+
+  (defn ^:export init []
+    (-> (db/init-db!)
+        (.then (fn []
+                 (db/start-auto-save!)
+                 ;; Start your app rendering
+                 (mount-root)))))
+
+  Summary
+
+  1. Define schema - What data structure you need
+  2. Create IndexedDB helpers - Save/load functions
+  3. Initialize connection - Load from IndexedDB or create new
+  4. Auto-save - Listen to transactions and persist
+  5. Use it - Add bookmarks, notes, etc.
+#+end_quote
+*** DONE proposed schema
+CLOSED: [2026-01-31 Sat 14:36]
+
+❯ Here's my proposed schema. Do you see any issues or problems or things that may be missing?
+  ```clojure
+  (def schema
+  {:bookmark/id {:db/unique :db.unique/identity}
+  :bookmark/book {:db/index true}
+  :bookmark/chapter {:db/index true}
+  :bookmark/verse {:db/index true}
+  :bookmark/created_at {:db/index true}
+  :bookmark/updated_at {:db/index true}
+  :bookmark/color {}
+
+  :note/id {:db/unique :db.unique/identity}
+  :note/content {}
+  :note/created_at {:db/index true}
+  :note/updated_at {:db/index true}
+
+  :tag/id {:db/unique :db.unique/identity}
+  :tag/name {}
+  :tag/created_at {:db/index true}
+  :tag {:db/index true}
+
+  :reading-position/book {}
+  :reading-position/chapter {}
+  :reading-position/verse {}
+
+  :settings/font-size {}
+  ;:settings/color-scheme {}
+
+  ; relationships
+  :bookmark/notes {:db/valueType :db.type/ref :db/cardinality :db.cardinality/many}
+  :bookmark/tags {:db/valueType :db.type/ref :db/cardinality :db.cardinality/many}
+
+  :note/bookmark {:db/valueType :db.type/ref}
+  :note/tags {:db/valueType :db.type/ref :db/cardinality :db.cardinality/many}
+
+  :tag/notes {:db/valueType :db.type/ref :db/cardinality :db.cardinality/many}
+  :tag/bookmarks {:db/valueType :db.type/ref :db/cardinality :db.cardinality/many}
+  })
+  ```
+
+● Good schema! I see a few issues and suggestions:
+
+  Issues to Fix
+
+  1. Typo in Tag Schema
+
+  :tag {:db/index true}  ; ❌ What is this?
+  This looks like a typo. Should it be removed?
+
+  2. Naming Convention: Underscores vs Dashes
+
+  :bookmark/created_at  ; ❌ Snake_case
+  :reading-position/book  ; ✅ Kebab-case
+
+  ClojureScript convention is kebab-case (dashes, not underscores). Should be:
+  :bookmark/created-at   ; ✅
+  :bookmark/updated-at   ; ✅
+  :note/created-at       ; ✅
+  :note/updated-at       ; ✅
+  :tag/created-at        ; ✅
+
+  3. Notes Missing Location
+
+  Notes don't have book/chapter/verse. What if a note isn't attached to a bookmark? How do you know what verse it's about?
+
+  :note/id {:db/unique :db.unique/identity}
+  :note/content {}
+  :note/book {:db/index true}      ; ADD
+  :note/chapter {:db/index true}   ; ADD
+  :note/verse {:db/index true}     ; ADD
+  :note/bookmark {:db/valueType :db.type/ref}  ; Optional reference
+
+  This way notes can be:
+  - Standalone (has book/chapter/verse, no bookmark)
+  - Attached to bookmark (has bookmark ref, optionally has location too)
+
+  ---
+  Design Questions
+
+  4. Redundant Bidirectional Relationships
+
+  You have both directions defined:
+  :bookmark/notes {:db/valueType :db.type/ref :db/cardinality :db.cardinality/many}
+  :note/bookmark {:db/valueType :db.type/ref}
+
+  :tag/notes {:db/valueType :db.type/ref :db/cardinality :db.cardinality/many}
+  :note/tags {:db/valueType :db.type/ref :db/cardinality :db.cardinality/many}
+
+  Problem: You have to manually maintain both sides:
+  ;; When adding a note to a bookmark, you'd need to:
+  (d/transact! conn
+    [[:db/add note-id :note/bookmark bookmark-id]
+     [:db/add bookmark-id :bookmark/notes note-id]])  ; Maintain both!
+
+  Solution: Only define ONE direction, use reverse queries for the other:
+
+  ;; Option A: Keep child → parent refs only
+  :note/bookmark {:db/valueType :db.type/ref}
+  :note/tags {:db/valueType :db.type/ref :db/cardinality :db.cardinality/many}
+  ;; Remove :bookmark/notes and :tag/notes
+
+  ;; Query "notes for bookmark" using reverse lookup:
+  (d/q '[:find [?note ...]
+         :in $ ?bookmark-id
+         :where [?note :note/bookmark ?bookmark-id]]
+       @conn bookmark-id)
+
+  ;; Query "bookmark for note" (direct):
+  (d/q '[:find ?bookmark .
+         :in $ ?note-id
+         :where [?note-id :note/bookmark ?bookmark]]
+       @conn note-id)
+
+  Or keep bidirectional if you want, but you'll need to maintain both sides manually.
+
+  5. Reading Position & Settings - No Unique ID
+
+  How do you ensure there's only ONE reading position or ONE settings entity?
+
+  ;; Option A: Add unique IDs with fixed values
+  :reading-position/id {:db/unique :db.unique/identity}
+  :settings/id {:db/unique :db.unique/identity}
+
+  ;; Then always use the same ID:
+  (def READING_POSITION_ID #uuid "00000000-0000-0000-0000-000000000001")
+  (def SETTINGS_ID #uuid "00000000-0000-0000-0000-000000000002")
+
+  ;; Option B: Query and check if exists before creating
+  (defn get-reading-position []
+    (d/q '[:find ?book ?chapter ?verse
+           :where
+           [_ :reading-position/book ?book]
+           [_ :reading-position/chapter ?chapter]
+           [_ :reading-position/verse ?verse]]
+         @conn))
+
+  I'd recommend Option A - use fixed UUIDs for singletons.
+
+  6. Tags Missing updated-at
+
+  Tags have :tag/created-at but no :tag/updated-at. Can tags be renamed? If so, add it.
+
+  ---
+  Revised Schema
+
+  Here's my suggested version with fixes:
+
+  (def schema
+    {;; Bookmarks
+     :bookmark/id {:db/unique :db.unique/identity}
+     :bookmark/book {:db/index true}
+     :bookmark/chapter {:db/index true}
+     :bookmark/verse {:db/index true}
+     :bookmark/created-at {:db/index true}
+     :bookmark/updated-at {:db/index true}
+     :bookmark/color {}
+
+     ;; Notes
+     :note/id {:db/unique :db.unique/identity}
+     :note/content {}
+     :note/book {:db/index true}      ; Added
+     :note/chapter {:db/index true}   ; Added
+     :note/verse {:db/index true}     ; Added
+     :note/created-at {:db/index true}
+     :note/updated-at {:db/index true}
+
+     ;; Tags
+     :tag/id {:db/unique :db.unique/identity}
+     :tag/name {:db/index true}       ; Added index - useful for lookups
+     :tag/created-at {:db/index true}
+     :tag/updated-at {}               ; Added
+
+     ;; Reading position (singleton)
+     :reading-position/id {:db/unique :db.unique/identity}  ; Added
+     :reading-position/book {}
+     :reading-position/chapter {}
+     :reading-position/verse {}
+     :reading-position/updated-at {}  ; When was this updated?
+
+     ;; Settings (singleton)
+     :settings/id {:db/unique :db.unique/identity}  ; Added
+     :settings/font-size {}
+
+     ;; Relationships (one direction only)
+     :note/bookmark {:db/valueType :db.type/ref}
+     :note/tags {:db/valueType :db.type/ref :db/cardinality :db.cardinality/many}
+     :bookmark/tags {:db/valueType :db.type/ref :db/cardinality :db.cardinality/many}
+     })
+
+  Key changes:
+  1. ✅ Fixed naming (dashes not underscores)
+  2. ✅ Added location to notes
+  3. ✅ Removed redundant bidirectional refs
+  4. ✅ Added IDs for singletons
+  5. ✅ Added updated-at for reading-position
+  6. ✅ Added updated-at for tags
+  7. ✅ Removed :tag {:db/index true} typo
+*** TODO test
+How to Test
+
+Start your app:
+npx shadow-cljs watch app
+
+Open browser console and test:
+// Check if database initialized
+bible.repositories.database.conn
+
+// Add a test bookmark
+bible.repositories.database.add_bookmark_BANG_("Genesis", 1, 1)
+
+// Get all bookmarks
+bible.repositories.database.get_bookmarks()
+
+// Refresh page - bookmark should persist!
+** TODO psalms does not load :bug:
+** TODO going back doesn't correctly load the last chapter :bug:
+
+e.g.
+1. goto exodus 1
+2. press back
+3. doesnt end up on genesis 50
+   instead ends up on 40 for some reason
 ** TODO complete top nav
 design of the nav so that i can type in the book name and get autocomplete
 
