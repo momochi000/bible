@@ -5,7 +5,7 @@
             [bible.data :as data]
             [bible.ui-components.jump :refer [book-chapter-verse]]
             [bible.api.jump :refer [move-previous-chapter! move-next-chapter!]]
-            ))
+            [bible.repositories.database :as db]))
 
 ;; Core UI Components
 (defn- handle-prev-chapter
@@ -51,6 +51,11 @@
 (defn init! []
   (data/load-bible-json!)
   (styles/inject-styles!)
+  ;; Initialize database and start auto-save
+  (-> (db/init-db!)
+      (.then (fn []
+               (db/start-auto-save!)
+               (js/console.log "Database ready"))))
   (mount-root))
 
 (defn ^:dev/after-load reload! []
